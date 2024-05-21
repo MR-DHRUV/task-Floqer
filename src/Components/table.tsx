@@ -1,33 +1,34 @@
 "use client";
 import React from "react";
-import data from "./data.json";
 import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, getKeyValue, Spinner, useDisclosure } from "@nextui-org/react";
 import { useAsyncList } from "@react-stately/data";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts'
 import Modal from "./modal";
+import { AggregateData, YearlyData, YearlyRows, ModalData, Data } from "./types";
+import jdata from "./data.json";
 
 export default function Home() {
 
-    const [yearlyData, setYearlyData] = React.useState({});
-    const [aggregateData, setAggregateData] = React.useState([]);
+    const [yearlyData, setYearlyData] = React.useState<YearlyData>({});
+    const [aggregateData, setAggregateData] = React.useState<AggregateData[]>([]);
+    const data = jdata as Data[];
 
     // Modal
     const { isOpen, onOpen, onClose } = useDisclosure();
-    const [modalData, setModalData] = React.useState({
+    const [modalData, setModalData] = React.useState<ModalData>({
         year: "",
         data: []
     });
 
     // function to process json data
     const processData = () => {
-        const yearlyData = {};
-        const yearlyRows = {};
-        const formattedYearlyData = {};
+        const yearlyData:any = {};
+        const yearlyRows:YearlyRows = {};
+        const formattedYearlyData:YearlyData = {};
 
         // Process each row
         data.forEach(item => {
             const year = item.work_year;
-            item.salary_in_usd = parseInt(item.salary_in_usd);
 
             // Group data by year
             if (!yearlyData[year]) {
@@ -57,30 +58,30 @@ export default function Home() {
         });
 
         // Format data for table and charts
-        const formattedData = Object.keys(yearlyData).map(year => {
-            let avg = (yearlyData[year].totalSalary / yearlyData[year].jobCount);
+        const aggregatedData:AggregateData[] = Object.keys(yearlyData).map(year => {
+            let avg = (yearlyData[year].totalSalary / yearlyData[year].jobCount).toFixed(3);
             return ({
                 year,
                 numberOfTotalJobs: yearlyData[year].jobCount,
-                averageSalary: parseFloat(avg).toFixed(3) || avg
+                averageSalary: parseFloat(avg)
             })
         });
 
         Object.keys(yearlyRows).forEach(year => {
             formattedYearlyData[year] = Object.keys(yearlyRows[year]).map((job, idx) => {
-                let avg = (yearlyRows[year][job].totalSalary / yearlyRows[year][job].jobCount);
+                let avg = (yearlyRows[year][job].totalSalary / yearlyRows[year][job].jobCount).toFixed(3);
                 return ({
                     key: `${year}-${idx}`,
                     job,
                     jobCount: yearlyRows[year][job].jobCount,
-                    averageSalary: parseFloat(avg).toFixed(3) || avg
+                    averageSalary: avg
                 })
             })
         });
 
         setYearlyData(formattedYearlyData);
-        setAggregateData(formattedData);
-        return formattedData;
+        setAggregateData(aggregatedData);
+        return aggregatedData;
     };
 
     // State for loading
@@ -95,10 +96,13 @@ export default function Home() {
                 items: data,
             };
         },
-        async sort({ items, sortDescriptor }) {
+        async sort({ items, sortDescriptor}) {
             return {
                 items: items.sort((a, b) => {
+                    // Anything can be sorted, so we need to use dynamic key access
+                    // @ts-ignore: Ignore TypeScript error for dynamic key access
                     let first = a[sortDescriptor.column];
+                    // @ts-ignore: Ignore TypeScript error for dynamic key access
                     let second = b[sortDescriptor.column];
                     let cmp = (parseInt(first) || first) < (parseInt(second) || second) ? -1 : 1;
 
@@ -117,7 +121,7 @@ export default function Home() {
             <Modal isOpen={isOpen} onClose={onClose} modalData={modalData} />
             <div className="flex h-full justify-center">
                 <div className="flex flex-col container mt-5">
-                    <h2 class="text-4xl font-extrabold dark:text-white mt-6 mb-3.5 text-center">Machine Learning Engineer Salary Analytics</h2>
+                    <h2 className="text-4xl font-extrabold dark:text-white mt-6 mb-3.5 text-center">Machine Learning Engineer Salary Analytics</h2>
                     <Table
                         selectionMode="single"
                         isHeaderSticky
@@ -144,7 +148,7 @@ export default function Home() {
                             isLoading={isLoading}
                             loadingContent={<Spinner label="Loading..." />}
                         >
-                            {(item) => (
+                            {(item:any) => (
                                 <TableRow key={item.year} onClick={() => {
                                     setModalData({
                                         year: item.year,
@@ -158,13 +162,13 @@ export default function Home() {
                         </TableBody>
                     </Table>
 
-                    <h2 class="text-2xl font-extrabold dark:text-white mt-6 mb-3.5">Graphs</h2>
+                    <h2 className="text-2xl font-extrabold dark:text-white mt-6 mb-3.5">Graphs</h2>
                     <div className="flex flex-row justify-around w-full flex-wrap">
                         <LineChart width={730} height={300} data={aggregateData}
                             margin={{ top: 10, right: 30, left: 20, bottom: 5 }}>
                             <CartesianGrid strokeDasharray="3 3" />
                             <XAxis dataKey="year" />
-                            <YAxis type="number" domain={[100000, 180000]} />
+                            <YAxis type="number" domain={[80000, 180000]} />
                             <Tooltip />
                             <Legend />
                             <Line type="monotone" dataKey="averageSalary" stroke="#8884d8" />
