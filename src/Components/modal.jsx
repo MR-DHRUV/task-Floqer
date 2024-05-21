@@ -94,7 +94,7 @@ export default function App({ isOpen, onClose, modalData }) {
                                 <div className="chartContainer">
                                     <BarChart width={1400} height={350} data={data} margin={{ top: 20, right: 20, bottom: 20, left: 20 }} className="mt-12 mychart">
                                         <XAxis dataKey="job" />
-                                        <YAxis />
+                                        <YAxis domain={[0,450000]}/>
                                         <Tooltip />
                                         <Bar dataKey="averageSalary" fill="#8884d8" />
                                     </BarChart>
