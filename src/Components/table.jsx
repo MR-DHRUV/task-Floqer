@@ -117,7 +117,7 @@ export default function Home() {
             <Modal isOpen={isOpen} onClose={onClose} modalData={modalData} />
             <div className="flex h-full justify-center">
                 <div className="flex flex-col container mt-5">
-                    <h2 class="text-4xl font-extrabold dark:text-white mt-6 mb-3.5">Data</h2>
+                    <h2 class="text-4xl font-extrabold dark:text-white mt-6 mb-3.5 text-center">Machine Learning Engineer Salary Analytics</h2>
                     <Table
                         selectionMode="single"
                         isHeaderSticky
@@ -158,7 +158,7 @@ export default function Home() {
                         </TableBody>
                     </Table>
 
-                    <h2 class="text-4xl font-extrabold dark:text-white mt-6 mb-3.5">Analytics</h2>
+                    <h2 class="text-2xl font-extrabold dark:text-white mt-6 mb-3.5">Graphs</h2>
                     <div className="flex flex-row justify-around w-full flex-wrap">
                         <LineChart width={730} height={300} data={aggregateData}
                             margin={{ top: 10, right: 30, left: 20, bottom: 5 }}>
